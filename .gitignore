@@ -1,0 +1,17 @@
+*.iml
+.gradle/
+/local.properties
+.idea/
+.DS_Store
+build/
+/captures
+.externalNativeBuild
+.cxx
+*.apk
+*.aab
+*.keystore
+*.jks
+
+# Chave de debug compartilhada com o XPodcaster do celular (não é segredo):
+# a Wearable Data Layer só conecta apps com a mesma assinatura.
+!keystore/xpodcaster-debug.keystore
