@@ -14,8 +14,8 @@ android {
         applicationId = "com.xpodcaster.xpodcaster"
         minSdk = 30
         targetSdk = 34
-        versionCode = 100001
-        versionName = "0.1.0"
+        versionCode = 100002
+        versionName = "0.2.0"
     }
 
     signingConfigs {

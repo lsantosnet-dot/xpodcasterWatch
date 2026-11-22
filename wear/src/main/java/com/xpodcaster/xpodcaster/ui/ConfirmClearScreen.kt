@@ -38,6 +38,7 @@ fun ConfirmClearScreen(app: WatchApp, onDone: () -> Unit) {
             onClick = {
                 app.speech.stop()
                 app.store.clear()
+                app.resume.clear()
                 onDone()
             },
             label = { Text("Limpar", color = Danger, modifier = Modifier.fillMaxWidth(), textAlign = TextAlign.Center) },

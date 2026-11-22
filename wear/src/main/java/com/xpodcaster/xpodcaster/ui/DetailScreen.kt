@@ -4,6 +4,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
@@ -24,12 +26,30 @@ import androidx.wear.compose.material.Text
 import androidx.wear.compose.material.TimeText
 import com.xpodcaster.xpodcaster.R
 import com.xpodcaster.xpodcaster.WatchApp
+import kotlinx.coroutines.flow.distinctUntilChanged
 
 @Composable
-fun DetailScreen(app: WatchApp, index: Int, onListen: () -> Unit) {
+fun DetailScreen(app: WatchApp, index: Int, startParagraph: Int = 0, onListen: () -> Unit) {
     val items by app.store.items.collectAsStateWithLifecycle()
     val item = items.getOrNull(index)
-    val listState = rememberScalingLazyListState(initialCenterItemIndex = 0)
+    // Um parágrafo por item da lista: rola melhor que um Text gigante.
+    val paragraphs = item?.text.orEmpty().split('\n').map { it.trim() }.filter { it.isNotEmpty() }
+    val firstParagraphItem = 2 // depois do cabeçalho e do título
+    val listState = rememberScalingLazyListState(
+        initialCenterItemIndex = if (startParagraph > 0) firstParagraphItem + startParagraph else 0,
+    )
+
+    // Guarda o parágrafo do centro da tela como "última leitura"; chegar ao fim conta como lida.
+    LaunchedEffect(item?.id) {
+        val id = item?.id ?: return@LaunchedEffect
+        snapshotFlow { listState.centerItemIndex }
+            .distinctUntilChanged()
+            .collect { center ->
+                val paragraph = (center - firstParagraphItem).coerceIn(0, (paragraphs.size - 1).coerceAtLeast(0))
+                val finished = center >= firstParagraphItem + paragraphs.size
+                app.resume.saveReading(id, paragraph, finished)
+            }
+    }
     // Texto longo: sem o efeito de encolher nas bordas, que atrapalha a leitura.
     val noScaling = ScalingLazyColumnDefaults.scalingParams(edgeScale = 1f, edgeAlpha = 1f)
 
@@ -64,8 +84,6 @@ fun DetailScreen(app: WatchApp, index: Int, onListen: () -> Unit) {
                     modifier = Modifier.fillMaxWidth().padding(horizontal = 6.dp),
                 )
             }
-            // Um parágrafo por item da lista: rola melhor que um Text gigante.
-            val paragraphs = item.text.split('\n').map { it.trim() }.filter { it.isNotEmpty() }
             paragraphs.forEach { p ->
                 item {
                     Text(

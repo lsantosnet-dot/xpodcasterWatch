@@ -8,6 +8,7 @@ import androidx.wear.compose.navigation.SwipeDismissableNavHost
 import androidx.wear.compose.navigation.composable
 import androidx.wear.compose.navigation.rememberSwipeDismissableNavController
 import com.xpodcaster.xpodcaster.WatchApp
+import com.xpodcaster.xpodcaster.data.ResumeMode
 
 class MainActivity : ComponentActivity() {
     private val app get() = application as WatchApp
@@ -31,7 +32,15 @@ private fun WearNavigation(app: WatchApp) {
         composable("list") {
             ListScreen(
                 app = app,
-                onOpen = { i -> nav.navigate("detail/$i") },
+                onOpen = { i -> nav.navigate("detail/$i/0") },
+                onResume = { target ->
+                    if (target.mode == ResumeMode.LISTEN) {
+                        app.speech.playFrom(target.index, target.position)
+                        nav.navigate("player")
+                    } else {
+                        nav.navigate("detail/${target.index}/${target.position}")
+                    }
+                },
                 onPlayAll = {
                     app.speech.playFrom(0)
                     nav.navigate("player")
@@ -40,11 +49,13 @@ private fun WearNavigation(app: WatchApp) {
                 onClear = { nav.navigate("confirm") },
             )
         }
-        composable("detail/{i}") { entry ->
+        composable("detail/{i}/{p}") { entry ->
             val i = entry.arguments?.getString("i")?.toIntOrNull() ?: return@composable
+            val p = entry.arguments?.getString("p")?.toIntOrNull() ?: 0
             DetailScreen(
                 app = app,
                 index = i,
+                startParagraph = p,
                 onListen = {
                     app.speech.playFrom(i)
                     nav.navigate("player") { popUpTo("list") }

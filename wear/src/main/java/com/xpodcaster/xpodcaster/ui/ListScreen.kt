@@ -11,6 +11,7 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -36,17 +37,23 @@ import androidx.wear.compose.material.Vignette
 import androidx.wear.compose.material.VignettePosition
 import com.xpodcaster.xpodcaster.R
 import com.xpodcaster.xpodcaster.WatchApp
+import com.xpodcaster.xpodcaster.data.Resume
+import com.xpodcaster.xpodcaster.data.ResumeMode
+import com.xpodcaster.xpodcaster.data.ResumeTarget
 
 @Composable
 fun ListScreen(
     app: WatchApp,
     onOpen: (Int) -> Unit,
+    onResume: (ResumeTarget) -> Unit,
     onPlayAll: () -> Unit,
     onPlayer: () -> Unit,
     onClear: () -> Unit,
 ) {
     val items by app.store.items.collectAsStateWithLifecycle()
     val speech by app.speech.state.collectAsStateWithLifecycle()
+    val point by app.resume.point.collectAsStateWithLifecycle()
+    val target = remember(point, items) { Resume.resolve(point, items, System.currentTimeMillis()) }
     val listState = rememberScalingLazyListState()
 
     Scaffold(
@@ -75,6 +82,31 @@ fun ListScreen(
                 }
                 return@ScalingLazyColumn
             }
+            if (target != null && !speech.speaking) {
+                item {
+                    val listening = target.mode == ResumeMode.LISTEN
+                    Chip(
+                        onClick = { onResume(target) },
+                        label = { Text(if (listening) "Continuar ouvindo" else "Continuar lendo") },
+                        secondaryLabel = {
+                            Text(
+                                "${target.index + 1} de ${items.size} · ${items[target.index].title}",
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis,
+                            )
+                        },
+                        icon = {
+                            Icon(
+                                painterResource(if (listening) R.drawable.ic_headphones else R.drawable.ic_read),
+                                contentDescription = null,
+                                modifier = Modifier.size(ChipDefaults.IconSize),
+                            )
+                        },
+                        colors = ChipDefaults.primaryChipColors(),
+                        modifier = Modifier.fillMaxWidth(),
+                    )
+                }
+            }
             item {
                 val playing = speech.speaking
                 Chip(
@@ -92,12 +124,13 @@ fun ListScreen(
                             modifier = Modifier.size(ChipDefaults.IconSize),
                         )
                     },
-                    colors = ChipDefaults.primaryChipColors(),
+                    colors = if (target != null && !playing) ChipDefaults.secondaryChipColors() else ChipDefaults.primaryChipColors(),
                     modifier = Modifier.fillMaxWidth(),
                 )
             }
             itemsIndexed(items, key = { _, it -> it.id }) { i, item ->
                 val current = speech.speaking && speech.index == i
+                val resumeHere = !speech.speaking && target?.index == i
                 Card(
                     onClick = { onOpen(i) },
                     backgroundPainter = CardDefaults.cardBackgroundPainter(CardBg, CardBg),
@@ -107,9 +140,9 @@ fun ListScreen(
                 ) {
                     Row(Modifier.fillMaxWidth()) {
                         Text(
-                            "${i + 1} de ${items.size}",
+                            if (resumeHere) "${i + 1} de ${items.size} · continuar" else "${i + 1} de ${items.size}",
                             fontSize = 10.sp,
-                            color = if (current) Teal else Muted,
+                            color = if (current || resumeHere) Teal else Muted,
                             modifier = Modifier.weight(1f),
                         )
                         item.dateLabel?.let {

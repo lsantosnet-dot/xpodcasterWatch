@@ -2,6 +2,7 @@ package com.xpodcaster.xpodcaster
 
 import android.app.Application
 import com.xpodcaster.xpodcaster.data.NewsStore
+import com.xpodcaster.xpodcaster.data.ResumeStore
 import com.xpodcaster.xpodcaster.playback.SpeechController
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -11,13 +12,16 @@ class WatchApp : Application() {
     val appScope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
     lateinit var store: NewsStore
         private set
+    lateinit var resume: ResumeStore
+        private set
     lateinit var speech: SpeechController
         private set
 
     override fun onCreate() {
         super.onCreate()
         store = NewsStore(this, appScope)
-        speech = SpeechController(this, store)
+        resume = ResumeStore(this)
+        speech = SpeechController(this, store, resume)
         store.publishStatus()
     }
 }

@@ -14,6 +14,12 @@ para ler e ouvir sem o celular por perto.
   anunciando "Notícia 2 de 5." antes de cada uma e trocando a voz para o idioma da notícia.
   No detalhe, **Ouvir a partir daqui** começa daquela notícia. Tela de reprodução com anterior,
   tocar/pausar, próxima e anel de progresso.
+- **Continuar de onde parou**: o relógio guarda a última notícia lida ou ouvida (em
+  `resume.json`, sobrevive ao app ser fechado). No topo da lista aparece **Continuar ouvindo**
+  (volta na frase onde parou; depois de 2 minutos parado, volta uma frase) ou **Continuar lendo**
+  (abre no parágrafo onde estava). Se a notícia foi até o fim, o chip aponta para a próxima.
+  A posição é guardada pelo id da notícia: se uma lista nova do celular ainda tiver aquela notícia,
+  o chip continua valendo. A pausa na tela de reprodução também retoma na mesma frase.
 - **Limpar tudo**: no fim da lista, com confirmação. Para ter as notícias de novo, envie outra vez
   pelo celular.
 
