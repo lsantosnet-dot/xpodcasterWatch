@@ -3,6 +3,9 @@
 
     <uses-feature android:name="android.hardware.type.watch" />
 
+    <!-- Lembrete periódico com a próxima notícia para ler. -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+
     <application
         android:name=".WatchApp"
         android:allowBackup="true"
@@ -20,12 +23,18 @@
         <activity
             android:name=".ui.MainActivity"
             android:exported="true"
+            android:launchMode="singleTop"
             android:taskAffinity="">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <!-- Botão "Lida" da notificação. -->
+        <receiver
+            android:name=".notify.MarkReadReceiver"
+            android:exported="false" />
 
         <service
             android:name=".data.DataLayerService"

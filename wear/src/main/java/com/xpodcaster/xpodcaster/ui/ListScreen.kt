@@ -37,6 +37,7 @@ import androidx.wear.compose.material.Vignette
 import androidx.wear.compose.material.VignettePosition
 import com.xpodcaster.xpodcaster.R
 import com.xpodcaster.xpodcaster.WatchApp
+import com.xpodcaster.xpodcaster.data.NotifySettings
 import com.xpodcaster.xpodcaster.data.Resume
 import com.xpodcaster.xpodcaster.data.ResumeMode
 import com.xpodcaster.xpodcaster.data.ResumeTarget
@@ -48,11 +49,13 @@ fun ListScreen(
     onResume: (ResumeTarget) -> Unit,
     onPlayAll: () -> Unit,
     onPlayer: () -> Unit,
+    onNotifySettings: () -> Unit,
     onClear: () -> Unit,
 ) {
     val items by app.store.items.collectAsStateWithLifecycle()
     val speech by app.speech.state.collectAsStateWithLifecycle()
     val point by app.resume.point.collectAsStateWithLifecycle()
+    val notify by app.notifySettings.settings.collectAsStateWithLifecycle()
     val target = remember(point, items) { Resume.resolve(point, items, System.currentTimeMillis()) }
     val listState = rememberScalingLazyListState()
 
@@ -158,6 +161,36 @@ fun ListScreen(
                         overflow = TextOverflow.Ellipsis,
                     )
                 }
+            }
+            item {
+                Chip(
+                    onClick = onNotifySettings,
+                    label = { Text("Notificações") },
+                    secondaryLabel = {
+                        Text(
+                            if (notify.enabled) {
+                                "A cada ${NotifySettings.intervalLabel(notify.intervalMinutes)}" +
+                                    if (notify.quietStart != notify.quietEnd) {
+                                        " · ${notify.quietEnd}h–${notify.quietStart}h"
+                                    } else {
+                                        ""
+                                    }
+                            } else {
+                                "Desligadas"
+                            },
+                            maxLines = 1,
+                        )
+                    },
+                    icon = {
+                        Icon(
+                            painterResource(R.drawable.ic_bell),
+                            contentDescription = null,
+                            modifier = Modifier.size(ChipDefaults.IconSize),
+                        )
+                    },
+                    colors = ChipDefaults.secondaryChipColors(),
+                    modifier = Modifier.fillMaxWidth().padding(top = 6.dp),
+                )
             }
             item {
                 Chip(
