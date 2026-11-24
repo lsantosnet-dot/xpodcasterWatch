@@ -35,4 +35,21 @@ object Resume {
         val position = if (rewind) point.position - 1 else point.position
         return ResumeTarget(i, point.mode, position.coerceAtLeast(0))
     }
+
+    /**
+     * A próxima notícia para ler (a da notificação). Diferente de [resolve], nunca fica sem
+     * resposta enquanto houver notícia nova: sem marcador, ou com a lista trocada pelo celular,
+     * começa da primeira. Só devolve null quando a última da lista já foi até o fim.
+     */
+    fun nextToRead(point: ResumePoint?, items: List<NewsItem>): ResumeTarget? {
+        if (items.isEmpty()) return null
+        val i = point?.let { p -> items.indexOfFirst { it.id == p.itemId } } ?: -1
+        if (i < 0) return ResumeTarget(0, ResumeMode.READ, 0)
+        if (point!!.finished) {
+            return if (i + 1 < items.size) ResumeTarget(i + 1, ResumeMode.READ, 0) else null
+        }
+        // Parou ouvindo no meio: a frase não corresponde a um parágrafo, então abre do começo.
+        val position = if (point.mode == ResumeMode.READ) point.position else 0
+        return ResumeTarget(i, ResumeMode.READ, position)
+    }
 }

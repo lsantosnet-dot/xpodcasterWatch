@@ -14,8 +14,8 @@ android {
         applicationId = "com.xpodcaster.xpodcaster"
         minSdk = 30
         targetSdk = 34
-        versionCode = 100002
-        versionName = "0.2.0"
+        versionCode = 100003
+        versionName = "0.3.0"
     }
 
     signingConfigs {
@@ -66,5 +66,6 @@ dependencies {
     implementation(libs.coroutines.android)
     implementation(libs.coroutines.play.services)
     implementation(libs.serialization.json)
+    implementation(libs.work.runtime)
     testImplementation(libs.junit)
 }

@@ -20,6 +20,14 @@ para ler e ouvir sem o celular por perto.
   (abre no parágrafo onde estava). Se a notícia foi até o fim, o chip aponta para a próxima.
   A posição é guardada pelo id da notícia: se uma lista nova do celular ainda tiver aquela notícia,
   o chip continua valendo. A pausa na tela de reprodução também retoma na mesma frase.
+- **Lembrete da próxima notícia**: de tempos em tempos o relógio mostra uma notificação com a
+  próxima notícia para ler (a mesma do "Continuar"). Tocar abre a notícia; **Lida** marca sem abrir;
+  **Ouvir** toca em voz alta. Ao ler até o fim (ou ouvir até o fim), ela conta como lida, a
+  notificação some e o marcador passa para a seguinte. Depois da última da lista, não avisa mais até
+  chegarem notícias novas.
+  O intervalo (15 min a 6 h) e o horário de silêncio (ex.: 22h às 8h) ficam em **Notificações**, no
+  fim da lista, e valem na hora, sem precisar de outro build. **Testar agora** mostra a notificação
+  na hora.
 - **Limpar tudo**: no fim da lista, com confirmação. Para ter as notícias de novo, envie outra vez
   pelo celular.
 
@@ -67,6 +75,8 @@ adb -s <ip-do-relogio>:<porta> install wear/build/outputs/apk/debug/wear-debug.a
 
 ## Limitações
 
+- O lembrete usa o WorkManager: o Android pode atrasar alguns minutos para economizar bateria.
+  O modo Hora de dormir / Não perturbe do relógio também silencia a notificação.
 - A leitura em voz alta para se o app do relógio for fechado.
 - O relógio precisa ter uma voz de TTS instalada (Samsung TTS ou Google). Sem a voz do idioma da
   notícia, lê com a voz em português.
